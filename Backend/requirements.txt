@@ -10,3 +10,4 @@ langchain-pinecone
 langchain-huggingface 
 sentence-transformers
 bs4
+langchain-tavily

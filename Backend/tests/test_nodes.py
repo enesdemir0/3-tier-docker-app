@@ -4,6 +4,7 @@ from agent.graph.nodes.retrieve import retrieve
 from agent.graph.nodes.grade_documents import grade_documents
 from langchain_core.documents import Document
 from agent.graph.nodes.generate import generate
+from agent.graph.nodes.web_search import web_search
 
 load_dotenv()
 
@@ -95,3 +96,32 @@ def test_generate_node_success():
     assert "Paris" in result["generation"] # It should use the document info
     
     print("\n✅ Passed: Generate node produced a correct, grounded answer.")
+
+
+def test_web_search_node_success():
+    """
+    Test that the web_search node successfully fetches 
+    data from the internet using Tavily.
+    """
+    # 1. Create a state with a general question
+    question = "Who won the Super Bowl in 2024?"
+    
+    initial_state = {
+        "question": question, 
+        "documents": [], 
+        "generation": "", 
+        "web_search": False
+    }
+
+    # 2. Call the node
+    result = web_search(initial_state)
+
+    # 3. Assertions
+    assert "documents" in result
+    assert len(result["documents"]) > 0
+    assert isinstance(result["documents"][0].page_content, str)
+    
+    # Check if the result actually contains some text
+    assert len(result["documents"][0].page_content) > 50
+    
+    print(f"\n✅ Passed: Web search node successfully retrieved internet results.")
