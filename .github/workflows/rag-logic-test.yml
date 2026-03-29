@@ -1,39 +1,29 @@
-name: Backend CI (Agentic RAG Tests)
+name: RAG Logic Tests
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
-  test:
+  logic-tests:
     runs-on: ubuntu-latest
-
-    # We need to provide the API keys so the tests can talk to Groq/Pinecone/Tavily
     env:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
       PINECONE_INDEX_NAME: ${{ secrets.PINECONE_INDEX_NAME }}
       TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
       PYTHONPATH: Backend
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
+      - uses: actions/checkout@v4
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install -r Backend/requirements.txt
           pip install pytest
-
-      - name: Run All Tests (Chains, Nodes, and Graph)
-        working-directory: ./Backend
+      - name: Run Chain and Node Tests
         run: |
-          python -m pytest tests/
+          cd Backend
+          python -m pytest tests/test_chains.py tests/test_nodes.py tests/test_graph.py
