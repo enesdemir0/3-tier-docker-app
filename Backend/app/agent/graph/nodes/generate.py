@@ -1,6 +1,6 @@
 from typing import Any, Dict
-from agent.graph.chains.generation import generation_chain
-from agent.graph.state import GraphState
+from app.agent.graph.chains.generation import generation_chain
+from app.agent.graph.state import GraphState
 
 def generate(state: GraphState) -> Dict[str, Any]:
     """

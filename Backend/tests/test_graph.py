@@ -1,4 +1,4 @@
-from agent.graph.graph import app
+from app.agent.graph.graph import app
 
 def test_full_agentic_rag_flow():
     """

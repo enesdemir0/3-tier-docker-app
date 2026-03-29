@@ -1,7 +1,7 @@
 from typing import Any, Dict
 from langchain_pinecone import PineconeVectorStore
 from langchain_huggingface import HuggingFaceEmbeddings
-from agent.graph.state import GraphState
+from app.agent.graph.state import GraphState
 import os
 
 def retrieve(state: GraphState) -> Dict[str, Any]:

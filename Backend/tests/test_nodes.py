@@ -1,10 +1,10 @@
 import pytest
 from dotenv import load_dotenv
-from agent.graph.nodes.retrieve import retrieve
-from agent.graph.nodes.grade_documents import grade_documents
+from app.agent.graph.nodes.retrieve import retrieve
+from app.agent.graph.nodes.grade_documents import grade_documents
 from langchain_core.documents import Document
-from agent.graph.nodes.generate import generate
-from agent.graph.nodes.web_search import web_search
+from app.agent.graph.nodes.generate import generate
+from app.agent.graph.nodes.web_search import web_search
 
 load_dotenv()
 

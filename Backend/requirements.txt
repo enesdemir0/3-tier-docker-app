@@ -11,3 +11,4 @@ langchain-huggingface
 sentence-transformers
 bs4
 langchain-tavily
+fastapi

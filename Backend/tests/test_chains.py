@@ -1,10 +1,10 @@
 import pytest
 from dotenv import load_dotenv
-from agent.graph.chains.router import question_router
-from agent.graph.chains.retrieval_grader import retrieval_grader
-from agent.graph.chains.generation import generation_chain
-from agent.graph.chains.answer_grader import answer_grader
-from agent.graph.chains.hallucination_grader import hallucination_grader
+from app.agent.graph.chains.router import question_router
+from app.agent.graph.chains.retrieval_grader import retrieval_grader
+from app.agent.graph.chains.generation import generation_chain
+from app.agent.graph.chains.answer_grader import answer_grader
+from app.agent.graph.chains.hallucination_grader import hallucination_grader
 
 load_dotenv()
 
