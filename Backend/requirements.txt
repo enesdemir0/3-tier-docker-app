@@ -12,3 +12,5 @@ sentence-transformers
 bs4
 langchain-tavily
 fastapi
+uvicorn
+pydantic-settings

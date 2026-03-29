@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     TAVILY_API_KEY: str
 
     class Config:
+        # This tells Pydantic where to find the .env file
         env_file = ".env"
 
 settings = Settings()
