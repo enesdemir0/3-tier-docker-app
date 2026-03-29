@@ -6,3 +6,7 @@ pinecone-client
 tavily-python
 python-dotenv
 pytest
+langchain-pinecone 
+langchain-huggingface 
+sentence-transformers
+bs4
