@@ -1,0 +1,7 @@
+langchain
+langgraph
+langchain-groq
+langchain-community
+pinecone-client
+tavily-python
+python-dotenv
