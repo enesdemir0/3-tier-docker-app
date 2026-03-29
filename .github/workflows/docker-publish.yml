@@ -1,11 +1,11 @@
-name: Build and Push to Docker Hub
+name: Docker Build & Publish
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-push:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -14,13 +14,15 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
+          # If the secret fails, this login will fail anyway, 
+          # which is better than a "Tag Error"
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Backend
+      - name: Build and Push Image
         uses: docker/build-push-action@v5
         with:
           context: ./Backend
           push: true
-          # Replace 'your-username' with your actual Docker Hub name
+          # NOTICE: No slash before the dollar sign!
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/rag-backend:v1
