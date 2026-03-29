@@ -5,3 +5,4 @@ langchain-community
 pinecone-client
 tavily-python
 python-dotenv
+pytest
