@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env  # This automatically injects your Groq, Pinecone, and Tavily keys!
+      - ./Backend/.env
     restart: always
 
   # --- TIER 3: THE FRONTEND ---
