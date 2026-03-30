@@ -18,33 +18,37 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }} 
           script: |
-            # 1. Create project folder
-            mkdir -p ~/app && cd ~/app
+            # 1. Setup App Directory
+            sudo mkdir -p /home/ubuntu/app
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/app
+            cd /home/ubuntu/app
             
-            # 2. Copy the docker-compose file from GitHub (You can also use 'git pull')
-            # For now, we will create a simple compose file on the server
+            # 2. Create the .env file
+            echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" > .env
+            echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
+            echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> .env
+            echo "TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}" >> .env
+            echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
+
+            # 3. Create the docker-compose.yml file
             cat <<EOF > docker-compose.yml
             version: '3.8'
             services:
               backend:
                 image: ${{ secrets.DOCKERHUB_USERNAME }}/rag-backend:latest
-                ports: ["8000:8000"]
+                ports:
+                  - "8000:8000"
                 env_file: .env
+                restart: always
               frontend:
                 image: ${{ secrets.DOCKERHUB_USERNAME }}/rag-frontend:latest
-                ports: ["80:80"]
+                ports:
+                  - "80:80"
+                restart: always
             EOF
 
-            # 3. Create the .env file with your real secrets
-            cat <<EOF > .env
-            GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
-            PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
-            PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}
-            TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}
-            EOF
-
-            # 4. Pull new images and restart the stack
+            # 4. Pull and Start (NO sudo here so it finds the plugin!)
             docker compose pull
             docker compose up -d --remove-orphans
