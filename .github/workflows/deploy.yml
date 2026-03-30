@@ -49,6 +49,7 @@ jobs:
                 restart: always
             EOF
 
-            # 4. Pull and Start (NO sudo here so it finds the plugin!)
+            # 4. Cleanup old images to save space, then Pull and Start
+            docker system prune -af # 🔥 FIX: Deletes old versions before pulling new ones
             docker compose pull
             docker compose up -d --remove-orphans
