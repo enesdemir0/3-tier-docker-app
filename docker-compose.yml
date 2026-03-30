@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # --- TIER 2: THE BACKEND ---
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env  # This automatically injects your Groq, Pinecone, and Tavily keys!
+    restart: always
+
+  # --- TIER 3: THE FRONTEND ---
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"  # We map the standard Web Port 80 to our Nginx container
+    depends_on:
+      - backend
+    restart: always
+
+# This creates a private network so the containers can talk to each other
+networks:
+  default:
+    name: rag-network

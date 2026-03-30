@@ -19,10 +19,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Image
+      - name: Build and Push Backend
         uses: docker/build-push-action@v5
         with:
           context: ./Backend
           push: true
           # NOTICE: No slash before the dollar sign!
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/rag-backend:v1
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/rag-frontend:latest
