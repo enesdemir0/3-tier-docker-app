@@ -1,12 +1,17 @@
 from pydantic import BaseModel
 from typing import List
 
+# 1. New model for professional source display
+class SourceModel(BaseModel):
+    url: str
+    content: str
+
+# 2. What we expect from the React Frontend
 class ChatRequest(BaseModel):
-    """What we expect from the React Frontend."""
     question: str
 
+# 3. What we send back to the React Frontend
 class ChatResponse(BaseModel):
-    """What we send back to the React Frontend."""
     question: str
     generation: str
-    documents: List[str]
+    sources: List[SourceModel] # Updated to use the list of objects

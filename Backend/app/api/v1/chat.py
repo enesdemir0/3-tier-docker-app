@@ -1,30 +1,32 @@
 from fastapi import APIRouter, HTTPException
 from app.agent.graph.graph import app as agent_app
-from app.schemas import ChatRequest, ChatResponse
+from app.schemas import ChatRequest, ChatResponse, SourceModel
 
 router = APIRouter()
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
-    """
-    Main Chat Endpoint that triggers the Agentic Graph.
-    """
     try:
-        # 1. Run the LangGraph
-        inputs = {"question": request.question}
-        config = {"configurable": {"thread_id": "api-user-1"}}
-        
-        result = agent_app.invoke(inputs, config)
+        # Run the LangGraph
+        result = agent_app.invoke({"question": request.question})
 
-        # 2. Format documents for JSON response
-        doc_contents = [doc.page_content for doc in result.get("documents", [])]
+        # --- PRO MAPPING: Turn Documents into SourceModel objects ---
+        formatted_sources = []
+        for doc in result.get("documents", []):
+            # Try to find a URL in metadata, fallback to '#' if missing
+            url = doc.metadata.get("url") or doc.metadata.get("source") or "#"
+            
+            formatted_sources.append(
+                SourceModel(
+                    url=str(url),
+                    content=doc.page_content[:400] # Take a nice snippet
+                )
+            )
 
-        # 3. Return the response
         return ChatResponse(
             question=result["question"],
             generation=result["generation"],
-            documents=doc_contents
+            sources=formatted_sources
         )
     except Exception as e:
-        # Professional error handling
         raise HTTPException(status_code=500, detail=str(e))

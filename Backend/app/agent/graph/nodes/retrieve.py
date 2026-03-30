@@ -4,6 +4,9 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from app.agent.graph.state import GraphState
 import os
 
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 def retrieve(state: GraphState) -> Dict[str, Any]:
     """
     Retrieve documents from Pinecone vectorstore.

@@ -15,26 +15,21 @@ def web_search(state: GraphState) -> Dict[str, Any]:
     question = state["question"]
     documents = state.get("documents", [])
 
-    # Execute search
     search_response = web_search_tool.invoke({"query": question})
     
-    # --- PRO FIX: Handle both String and List responses ---
-    if isinstance(search_response, str):
-        # If Tavily returned one big string, use it directly
-        joined_tavily_result = search_response
-    elif isinstance(search_response, list):
-        # If Tavily returned a list of dicts, join the content
-        joined_tavily_result = "\n".join(
-            [res.get("content", str(res)) for res in search_response]
-        )
+    # 🔥 PRO FIX: Extract only the 'content' string from each result
+    clean_contents = []
+    if isinstance(search_response, list):
+        for res in search_response:
+            if isinstance(res, dict) and "content" in res:
+                clean_contents.append(res["content"])
+            else:
+                clean_contents.append(str(res))
     else:
-        joined_tavily_result = str(search_response)
+        clean_contents.append(str(search_response))
+
+    joined_result = "\n\n".join(clean_contents)
+    web_results_doc = Document(page_content=joined_result)
     
-    web_results = Document(page_content=joined_tavily_result)
-    
-    if documents:
-        documents.append(web_results)
-    else:
-        documents = [web_results]
-        
+    documents.append(web_results_doc)
     return {"documents": documents, "question": question}
