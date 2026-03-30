@@ -1,7 +1,23 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+// --- 🍯 THE SMART LOGIC ---
+const getBaseUrl = () => {
+  // 1. Priority: If we specifically set an environment variable, use it.
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
 
+  // 2. Smart Detection: Look at the URL in the browser's address bar.
+  // If you are on 'localhost', hostname is 'localhost'.
+  // If you are on AWS '54.12.34.56', hostname is '54.12.34.56'.
+  const { hostname } = window.location;
+  
+  // We always want to talk to our Backend on Port 8000
+  return `http://${hostname}:8000/api/v1`;
+};
+
+const API_URL = getBaseUrl();
+// --------------------------
 
 export const sendMessage = async (question) => {
     try {
@@ -10,7 +26,7 @@ export const sendMessage = async (question) => {
         });
         return response.data;
     } catch (error) {
-        console.error("API Error:", error);
+        console.error("API Connection Error:", error);
         throw error;
     }
 };

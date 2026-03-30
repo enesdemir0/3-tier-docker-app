@@ -1,0 +1,50 @@
+name: Continuous Deployment (AWS)
+
+on:
+  workflow_run:
+    workflows: ["Docker Build & Publish"] # Only run after images are pushed to Docker Hub
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # 1. Create project folder
+            mkdir -p ~/app && cd ~/app
+            
+            # 2. Copy the docker-compose file from GitHub (You can also use 'git pull')
+            # For now, we will create a simple compose file on the server
+            cat <<EOF > docker-compose.yml
+            version: '3.8'
+            services:
+              backend:
+                image: ${{ secrets.DOCKERHUB_USERNAME }}/rag-backend:latest
+                ports: ["8000:8000"]
+                env_file: .env
+              frontend:
+                image: ${{ secrets.DOCKERHUB_USERNAME }}/rag-frontend:latest
+                ports: ["80:80"]
+            EOF
+
+            # 3. Create the .env file with your real secrets
+            cat <<EOF > .env
+            GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+            PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
+            PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}
+            TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}
+            EOF
+
+            # 4. Pull new images and restart the stack
+            docker compose pull
+            docker compose up -d --remove-orphans
