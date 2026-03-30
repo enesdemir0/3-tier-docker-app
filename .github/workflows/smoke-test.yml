@@ -1,4 +1,4 @@
-name: 3-Tier Smoke Test (Docker Compose)
+name: 3-Tier Smoke Test (Real Integration)
 
 on:
   push:
@@ -10,25 +10,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create Dummy .env for Testing
-        # We need a .env file for docker-compose to start, even with fake keys
+      - name: Create Real .env file
         run: |
           echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> .env
           echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
           echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> .env
           echo "TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}" >> .env
 
-      - name: Start the Stack
-        run: docker-compose up -d --build
+      - name: Build and Start with Docker Compose
+        # 🔥 FIX: Changed 'docker-compose' to 'docker compose'
+        run: docker compose up -d --build
 
-      - name: Wait for Backend (15 seconds)
-        run: sleep 15
+      - name: Wait for Services to Initialize
+        run: sleep 25 # Increased to 25s to give AI models time to load
 
       - name: Check Backend Health
         # We ask the backend if it's alive on port 8000
-        run: |
-          curl -f http://localhost:8000/ || exit 1
+        run: curl -f http://localhost:8000/ || exit 1
 
-      - name: Stop the Stack
+      - name: Shutdown Stack
         if: always()
-        run: docker-compose down
+        # 🔥 FIX: Changed 'docker-compose' to 'docker compose'
+        run: docker compose down
