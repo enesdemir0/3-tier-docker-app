@@ -34,7 +34,7 @@ jobs:
 
             # 3. Create the docker-compose.yml file
             cat <<EOF > docker-compose.yml
-            version: '3.8'
+            # 🔥 FIX: Removed the 'version' line
             services:
               backend:
                 image: ${{ secrets.DOCKERHUB_USERNAME }}/rag-backend:latest
