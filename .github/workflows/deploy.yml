@@ -2,7 +2,7 @@ name: Continuous Deployment (AWS)
 
 on:
   workflow_run:
-    workflows: ["Docker Build & Publish"] # Only run after images are pushed to Docker Hub
+    workflows: ["Docker Build & Publish"]
     types: [completed]
     branches: [main]
 
@@ -12,44 +12,37 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Deploy to EC2 via SSH
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }} 
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. Setup App Directory
-            sudo mkdir -p /home/ubuntu/app
-            sudo chown -R ubuntu:ubuntu /home/ubuntu/app
-            cd /home/ubuntu/app
+            mkdir -p ~/app && cd ~/app
             
-            # 2. Create the .env file
+            # Create .env
             echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" > .env
             echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
             echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> .env
             echo "TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}" >> .env
             echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
 
-            # 3. Create the docker-compose.yml file
+            # Create docker-compose.yml
             cat <<EOF > docker-compose.yml
-            # 🔥 FIX: Removed the 'version' line
             services:
               backend:
                 image: ${{ secrets.DOCKERHUB_USERNAME }}/rag-backend:latest
-                ports:
-                  - "8000:8000"
+                ports: ["8000:8000"]
                 env_file: .env
                 restart: always
               frontend:
                 image: ${{ secrets.DOCKERHUB_USERNAME }}/rag-frontend:latest
-                ports:
-                  - "80:80"
+                ports: ["80:80"]
                 restart: always
             EOF
 
-            # 4. Cleanup old images to save space, then Pull and Start
-            docker system prune -af # 🔥 FIX: Deletes old versions before pulling new ones
+            # Clean, Pull and Start
+            docker system prune -af
             docker compose pull
             docker compose up -d --remove-orphans
